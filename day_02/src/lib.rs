@@ -1,4 +1,4 @@
-pub fn part_a() {
+pub fn part_a() -> u64 {
     let (position, depth) = include_str!("../input.txt")
         .lines()
         .map(|line| line.split(" ").collect::<Vec<_>>())
@@ -13,10 +13,10 @@ pub fn part_a() {
             },
         );
 
-    println!("{}", position * depth);
+    (position * depth) as u64
 }
 
-pub fn part_b() {
+pub fn part_b() -> u64 {
     let (position, depth, _) = include_str!("../input.txt")
         .lines()
         .map(|line| line.split(" ").collect::<Vec<_>>())
@@ -31,5 +31,5 @@ pub fn part_b() {
             },
         );
 
-    println!("{}", position * depth);
+    (position * depth) as u64
 }

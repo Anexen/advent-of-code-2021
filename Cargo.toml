@@ -9,6 +9,7 @@ members = [
     "day_07",
     "day_08",
     "day_09",
+    "day_10",
 ]
 
 [package]
@@ -26,3 +27,4 @@ day_02 = { path = "day_02" }
 day_07 = { path = "day_07" }
 day_08 = { path = "day_08" }
 day_09 = { path = "day_09" }
+day_10 = { path = "day_10" }

@@ -7,7 +7,7 @@ members = [
     # "day_05",
     # "day_06",
     "day_07",
-    # "day_08",
+    "day_08",
     "day_09",
 ]
 
@@ -24,5 +24,5 @@ day_02 = { path = "day_02" }
 # day_05 = { path = "day_05" }
 # day_06 = { path = "day_06" }
 day_07 = { path = "day_07" }
-# day_08 = { path = "day_08" }
+day_08 = { path = "day_08" }
 day_09 = { path = "day_09" }

@@ -21,6 +21,8 @@ fn main() {
             "9b" => day_09::part_b(None),
             "10a" => day_10::part_a(None),
             "10b" => day_10::part_b(None),
+            "11a" => day_11::part_a(None),
+            "11b" => day_11::part_b(None),
             _ => unimplemented!(),
         };
         println!("{}", result);

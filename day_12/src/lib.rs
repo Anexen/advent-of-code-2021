@@ -1,5 +1,3 @@
-// TODO: optimize
-
 use std::collections::{HashMap, HashSet};
 
 struct Counter(u64);
@@ -13,37 +11,30 @@ impl Counter {
     }
 }
 
-// to try: &str + lifetime
-struct Graph {
-    adj_list: HashMap<String, Vec<String>>,
+struct Graph<'a> {
+    adj_list: HashMap<&'a str, Vec<&'a str>>,
 }
 
-impl Graph {
+impl<'a> Graph<'a> {
     fn new() -> Self {
         Self {
             adj_list: HashMap::new(),
         }
     }
 
-    fn add_edge(&mut self, src: &str, dest: &str) {
+    fn add_edge(mut self, src: &'a str, dest: &'a str) -> Graph<'a> {
         for (a, b) in [(src, dest), (dest, src)] {
-            self.adj_list
-                .entry(a.to_string())
-                .or_insert(Vec::new())
-                .push(b.to_string());
+            self.adj_list.entry(a).or_insert(Vec::new()).push(b);
         }
+        self
     }
 }
 
-fn read_input(input: &str) -> Graph {
-    let mut graph = Graph::new();
-
-    input.lines().for_each(|line| {
+fn read_input<'a>(input: &'a str) -> Graph<'a> {
+    input.lines().fold(Graph::new(), |graph, line| {
         let (a, b) = line.split_once("-").unwrap();
-        graph.add_edge(a, b);
-    });
-
-    graph
+        graph.add_edge(a, b)
+    })
 }
 
 fn count_a(
@@ -61,7 +52,7 @@ fn count_a(
     if src == dest {
         counter.inc();
     } else {
-        for adj in graph.adj_list.get(src).unwrap_or(&Vec::new()) {
+        for &adj in graph.adj_list.get(src).unwrap_or(&Vec::new()) {
             if !visited.contains(adj) {
                 count_a(graph, adj, dest, visited, counter)
             }
@@ -70,11 +61,11 @@ fn count_a(
     visited.remove(src);
 }
 
-fn count_b(
-    graph: &Graph,
+fn count_b<'a>(
+    graph: &'a Graph,
     src: &str,
     dest: &str,
-    path: &mut Vec<String>,
+    path: &mut Vec<&'a str>,
     counter: &mut Counter,
     v: bool,
 ) {
@@ -82,11 +73,11 @@ fn count_b(
         counter.inc();
         // println!("{:?}", path);
     } else {
-        for adj in graph.adj_list.get(src).unwrap_or(&Vec::new()) {
-            let a = &adj.to_lowercase() == adj && !v && path.contains(adj) && adj != "start";
-            if &adj.to_uppercase() == adj || !path.contains(adj) || a {
+        for &adj in graph.adj_list.get(src).unwrap_or(&Vec::new()) {
+            let a = &adj.to_lowercase() == adj && !v && path.contains(&adj) && adj != "start";
+            if &adj.to_uppercase() == adj || !path.contains(&adj) || a {
                 let v = v || a;
-                path.push(adj.to_string());
+                path.push(adj);
                 count_b(graph, adj, dest, path, counter, v);
                 path.pop();
             }
@@ -103,7 +94,7 @@ fn path_count_a(graph: &Graph, src: &str, dest: &str) -> u64 {
 
 fn path_count_b(graph: &Graph, src: &str, dest: &str) -> u64 {
     let mut counter = Counter::new();
-    let mut path = vec!["start".to_string()];
+    let mut path = vec!["start"];
     count_b(&graph, src, dest, &mut path, &mut counter, false);
     counter.0
 }
@@ -122,14 +113,14 @@ pub fn part_b(input: Option<&str>) -> u64 {
 mod tests {
     #[test]
     fn test_example_works() {
-        let mut graph = super::Graph::new();
-        graph.add_edge("start", "A");
-        graph.add_edge("start", "b");
-        graph.add_edge("A", "c");
-        graph.add_edge("A", "b");
-        graph.add_edge("b", "d");
-        graph.add_edge("A", "end");
-        graph.add_edge("b", "end");
+        let graph = super::Graph::new()
+            .add_edge("start", "A")
+            .add_edge("start", "b")
+            .add_edge("A", "c")
+            .add_edge("A", "b")
+            .add_edge("b", "d")
+            .add_edge("A", "end")
+            .add_edge("b", "end");
 
         assert_eq!(super::path_count_a(&graph, "start", "end"), 10);
         assert_eq!(super::path_count_b(&graph, "start", "end"), 36);

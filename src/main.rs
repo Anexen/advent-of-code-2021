@@ -27,6 +27,10 @@ fn main() {
             "13b" => day_13::part_b(None),
             "14a" => day_14::part_a(None),
             "14b" => day_14::part_b(None),
+            "15a" => day_15::part_a(None),
+            "15b" => day_15::part_b(None),
+            "16a" => day_16::part_a(None),
+            "16b" => day_16::part_b(None),
             _ => unimplemented!(),
         };
         println!("{}", result);

@@ -1,7 +1,9 @@
-#[derive(Clone)]
+use std::rc::Rc;
+
+#[derive(Debug, Clone)]
 enum Value {
     Literal(u8),
-    Pair(Box<Value>, Box<Value>),
+    Pair(Rc<Value>, Rc<Value>),
 }
 
 impl std::fmt::Display for Value {
@@ -26,7 +28,7 @@ impl std::str::FromStr for Value {
                     b']' => {
                         let right = stack.pop().unwrap();
                         let left = stack.pop().unwrap();
-                        stack.push(Value::Pair(Box::new(left), Box::new(right)));
+                        stack.push(Value::Pair(Rc::new(left), Rc::new(right)));
                     }
                     _ => {}
                 };
@@ -46,7 +48,7 @@ impl Value {
     }
 
     pub fn add(self, other: Self) -> Self {
-        Self::Pair(Box::new(self), Box::new(other)).reduce()
+        Self::Pair(Rc::new(self), Rc::new(other)).reduce()
     }
 
     fn reduce(mut self) -> Self {
@@ -72,31 +74,22 @@ impl Value {
     fn walk(&self, depth: u8) -> Option<(Option<u8>, Self, Option<u8>)> {
         if let Self::Pair(a, b) = self {
             if depth > 3 {
-                let (a, b) = (a.clone(), b.clone());
-                if let (Self::Literal(a), Self::Literal(b)) = (*a, *b) {
-                    Some((Some(a), Self::Literal(0), Some(b)))
+                if let (Self::Literal(a), Self::Literal(b)) = (a.as_ref(), b.as_ref()) {
+                    Some((Some(*a), Self::Literal(0), Some(*b)))
                 } else {
                     None
                 }
             } else if let Some((l, new_a, r)) = a.walk(depth + 1) {
                 if let Some(v) = r {
-                    Some((
-                        l,
-                        Self::Pair(Box::new(new_a), Box::new(b.add_left(v))),
-                        None,
-                    ))
+                    Some((l, Self::Pair(Rc::new(new_a), Rc::new(b.add_left(v))), None))
                 } else {
-                    Some((l, Self::Pair(Box::new(new_a), b.clone()), r))
+                    Some((l, Self::Pair(Rc::new(new_a), Rc::clone(b)), r))
                 }
             } else if let Some((l, new_b, r)) = b.walk(depth + 1) {
                 if let Some(v) = l {
-                    Some((
-                        None,
-                        Self::Pair(Box::new(a.add_right(v)), Box::new(new_b)),
-                        r,
-                    ))
+                    Some((None, Self::Pair(Rc::new(a.add_right(v)), Rc::new(new_b)), r))
                 } else {
-                    Some((l, Self::Pair(a.clone(), Box::new(new_b)), r))
+                    Some((l, Self::Pair(Rc::clone(a), Rc::new(new_b)), r))
                 }
             } else {
                 None
@@ -109,27 +102,27 @@ impl Value {
     fn add_left(&self, value: u8) -> Self {
         match self {
             Self::Literal(v) => Self::Literal(v + value),
-            Self::Pair(a, b) => Self::Pair(Box::new(a.add_left(value)), b.clone()),
+            Self::Pair(a, b) => Self::Pair(Rc::new(a.add_left(value)), Rc::clone(b)),
         }
     }
 
     fn add_right(&self, value: u8) -> Self {
         match self {
             Self::Literal(v) => Self::Literal(v + value),
-            Self::Pair(a, b) => Self::Pair(a.clone(), Box::new(b.add_right(value))),
+            Self::Pair(a, b) => Self::Pair(Rc::clone(a), Rc::new(b.add_right(value))),
         }
     }
     fn split(&self) -> Option<Self> {
         match self {
             Self::Literal(v) if *v > 9 => Some(Self::Pair(
-                Box::new(Self::Literal(v / 2)),
-                Box::new(Self::Literal(v - v / 2)),
+                Rc::new(Self::Literal(v / 2)),
+                Rc::new(Self::Literal(v - v / 2)),
             )),
             Self::Pair(left, right) => {
                 if let Some(a) = left.split() {
-                    Some(Self::Pair(Box::new(a), right.clone()))
+                    Some(Self::Pair(Rc::new(a), Rc::clone(right)))
                 } else if let Some(b) = right.split() {
-                    Some(Self::Pair(left.clone(), Box::new(b)))
+                    Some(Self::Pair(Rc::clone(left), Rc::new(b)))
                 } else {
                     None
                 }
@@ -213,6 +206,6 @@ mod tests {
     #[test]
     fn test_part_a() {
         let result = super::part_a(None);
-        assert_eq!(result, 4140);
+        assert_eq!(result, 3816);
     }
 }

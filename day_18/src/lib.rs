@@ -142,8 +142,28 @@ pub fn part_a(input: Option<&str>) -> u64 {
         .magnitude()
 }
 
-pub fn part_b(input: Option<&[u8]>) -> u64 {
-    unimplemented!()
+pub fn part_b(input: Option<&str>) -> u64 {
+    let fishes = input
+        .unwrap_or(include_str!("../input.txt"))
+        .lines()
+        .map(|line| line.parse::<Value>().unwrap())
+        .collect::<Vec<_>>();
+
+    let mut max = 0;
+
+    for i in 0..fishes.len() {
+        for j in 0..fishes.len() {
+            if i != j {
+                max = fishes[i]
+                    .clone()
+                    .add(fishes[j].clone())
+                    .magnitude()
+                    .max(max);
+            }
+        }
+    }
+
+    max
 }
 
 #[cfg(test)]
@@ -207,5 +227,17 @@ mod tests {
     fn test_part_a() {
         let result = super::part_a(None);
         assert_eq!(result, 3816);
+    }
+
+    #[test]
+    fn test_part_b_works() {
+        let result = super::part_b(Some(include_str!("../example.txt")));
+        assert_eq!(result, 3993);
+    }
+
+    #[test]
+    fn test_part_b() {
+        let result = super::part_b(None);
+        assert_eq!(result, 4819);
     }
 }

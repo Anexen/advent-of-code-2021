@@ -18,6 +18,13 @@ members = [
     "day_16",
     "day_17",
     "day_18",
+    # "day_19",
+    # "day_20",
+    # "day_21",
+    # "day_22",
+    # "day_23",
+    # "day_24",
+    "day_25",
 ]
 
 [package]
@@ -44,3 +51,10 @@ day_15 = { path = "day_15" }
 day_16 = { path = "day_16" }
 day_17 = { path = "day_17" }
 day_18 = { path = "day_18" }
+# day_19 = { path = "day_19" }
+# day_20 = { path = "day_20" }
+# day_21 = { path = "day_21" }
+# day_22 = { path = "day_22" }
+# day_23 = { path = "day_23" }
+# day_24 = { path = "day_24" }
+day_25 = { path = "day_25" }
